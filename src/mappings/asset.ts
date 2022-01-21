@@ -142,6 +142,7 @@ export function handleNewProposal(event: NewProposal): void {
 
   proposal.creator = event.params.creator
   proposal.dataURI = event.params.info
+  proposal.type = "null"
   proposal.startTimestamp = event.params.start.toI32()
   proposal.endTimestamp = event.params.end.toI32()
 
