@@ -1,0 +1,63 @@
+type MintedAsset @entity {
+  id: ID!
+  dataURI: String!
+  deployedAsset: DeployedAsset
+}
+
+type DeployedAsset @entity {
+  id: ID!
+  mintedAsset: MintedAsset!
+  contract: Bytes!
+  symbol: String!
+  numOfShares: Int! # or BigInt?
+  owners: [AssetOwnership!]! @derivedFrom(field: "asset")
+  marketOrders: [MarketOrder!]! @derivedFrom(field: "asset")
+  proposals: [Proposal!] @derivedFrom(field: "asset")
+}
+
+type AssetOwnership @entity {
+  id: ID!
+  asset: DeployedAsset!
+  owner: Bytes!
+  shares: Int!
+}
+
+type MarketOrder @entity {
+  id: ID!
+  orderType: MarketOrderType!
+  asset: DeployedAsset!
+  price: BigInt!
+  amount: Int!
+}
+
+enum MarketOrderType {
+  Buy
+  Sell
+}
+
+type Proposal @entity {
+  id: ID!
+  asset: DeployedAsset!
+  creator: Bytes!
+  dataURI: String!
+  votes: [Vote!]! @derivedFrom(field: "proposal")
+  startTimestamp: Int!
+  endTimestamp: Int!
+
+  # TODO: Add fields:
+  #   - status (is completed, is passed etc.)
+}
+
+type Vote @entity {
+  id: ID!
+  proposal: Proposal!
+  voter: Bytes!
+  voteType: VoteType!
+  count: Int! # or BigInt?
+}
+
+enum VoteType {
+  Yes
+  No
+  Abstain
+}
