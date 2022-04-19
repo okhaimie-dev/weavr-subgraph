@@ -5,11 +5,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Platform
+    name: Frabric
     network: rinkeby
     source:
       address: '0x0f173d9E444Bc4C3443D558dE848A369e8763077' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
-      abi: Platform
+      abi: Frabric
       startBlock: 9190790 # SET TO THE ACTUAL DEPLOYMENT BLOCK
     mapping:
       kind: ethereum/events
