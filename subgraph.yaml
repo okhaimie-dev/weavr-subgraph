@@ -5,61 +5,202 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Frabric
+    name: ThreadDeployer
     network: rinkeby
     source:
-      address: '0x0f173d9E444Bc4C3443D558dE848A369e8763077' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
-      abi: Frabric
-      startBlock: 9190790 # SET TO THE ACTUAL DEPLOYMENT BLOCK
+      address: '0x0000000000000000000000000000000000000000' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
+      abi: ThreadDeployer
+      startBlock: 0 # SET TO THE ACTUAL DEPLOYMENT BLOCK
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mappings/platform.ts
+      file: ./src/mappings/threadDeployer.ts
       entities:
-        - MintedAsset
-        - DeployedAsset
+        - Thread
       abis:
-        - name: Platform
-          file: ./abis/Platform.json
+        - name: ThreadDeployer
+          file: ./abis/ThreadDeployer.json
       eventHandlers:
-        - event: AssetMinted(indexed uint256,string)
-          handler: handleAssetMinted
-        - event: AssetDeployed(indexed uint256,indexed address,indexed uint256,address,uint256,string)
-          handler: handleAssetDeployed
+        - event: Thread(indexed address,indexed uint8,indexed address,address,bytes32)
+          handler: handleThread
 templates:
-  - name: Asset
+  - name: Thread
     kind: ethereum/contract
     network: rinkeby
     source:
-      abi: Asset
+      abi: Thread
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/mappings/asset.ts
+      file: ./src/mappings/thread.ts
       entities:
+        - DesriptorChangeProposal
+        - FrabricChangeProposal
+        - GovernorChangeProposal
+        - EcosystemLeaveWithUpgradesProposal
+        - DissolutionProposal
+        - UpgradeProposal
+        - TokenActionProposal
+        - ParticipantRemovalProposal
         - Proposal
         - Vote
+        - Frabric
       abis:
-        - name: Asset
-          file: ./abis/Asset.json
+        - name: Thread
+          file: ./abis/Thread.json
       eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-        - event: NewBuyOrder(indexed uint256)
-          handler: handleNewBuyOrder
-        - event: NewSellOrder(indexed uint256)
-          handler: handleNewSellOrder
+        - event: DescriptorChange(indexed bytes32,indexed bytes32)
+          handler: handleDescriptorChange
+        - event: DescriptorChangeProposal(uint256,indexed bytes32)
+          handler: handleDescriptorChangeProposal
+        - event: DissolutionProposal(indexed uint256,indexed address,uint256)
+          handler: handleDissolutionProposal
+        - event: EcosystemLeaveWithUpgradesProposal(indexed uint256,indexed address,indexed address)
+          handler: handleEcosystemLeaveWithUpgradesProposal
+        - event: FrabricChange(indexed address,indexed address)
+          handler: handleFrabricChange
+        - event: FrabricChangeProposal(indexed uint256,indexed address,indexed address)
+          handler: handleFrabricChangeProposal
+        - event: GovernorChange(indexed address,indexed address)
+          handler: handleGovernorChange
+        - event: GovernorChangeProposal(indexed uint256,indexed address)
+          handler: handleGovernorChangeProposal
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: ParticipantRemovalProposal(indexed uint256,address,uint8)
+          handler: handleParticipantRemovalProposal
+        - event: Proposal(indexed uint256,indexed uint256,indexed address,bool,bytes32)
+          handler: handleProposal
+        - event: ProposalStateChange(indexed uint256,indexed uint8)
+          handler: handleProposalStateChange
+        - event: TokenActionProposal(indexed uint256,indexed address,indexed address,bool,uint256,uint256)
+          handler: handleTokenActionProposal
+        - event: UpgradeProposal(indexed uint256,indexed address,indexed address,uint256,address,bytes)
+          handler: handleUpgradeProposal
+        - event: Vote(indexed uint256,indexed uint8,indexed address,uint112)
+          handler: handleVote
+  - name: FrabricERC20
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: FrabricERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/thread.ts
+      entities:
+        - FrabricERC20
+        - FrabricERC20Holder
+        - FrabricERC20Balance
+        - FrabricERC20Transfer
+        - WhitelistRecord
+        - PricePoint
+        - Order
+      abis:
+        - name: FrabricERC20
+          file: ./abis/FrabricERC20.json
+      eventHandlers:
+        - event: Claim(indexed uint256,indexed address,uint112)
+          handler: handleClaim
+        - event: DelegateChanged(indexed address,indexed address,indexed address)
+          handler: handleDelegateChanged
+        - event: DelegateVotesChanged(indexed address,uint256,uint256)
+          handler: handleDelegateVotesChanged
+        - event: Distribution(indexed uint256,indexed address,uint112)
+          handler: handleDistribution
+        - event: Freeze(indexed address,uint64)
+          handler: handleFreeze
+        - event: GlobalAcceptance()
+          handler: handleGlobalAcceptance
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: KYCUpdate(indexed address,indexed bytes32,indexed bytes32,uint256)
+          handler: handleKYCUpdate
+        - event: Order(indexed uint8,indexed uint256)
+          handler: handleOrder
+        - event: OrderCancellation(indexed address,indexed uint256,uint256)
+          handler: handleOrderCancellation
+        - event: OrderCancelling(indexed address,indexed uint256)
+          handler: handleOrderCancelling
+        - event: OrderFill(indexed address,indexed uint256,indexed address,uint256)
+          handler: handleOrderFill
         - event: OrderIncrease(indexed address,indexed uint256,uint256)
           handler: handleOrderIncrease
-        - event: Filled(indexed address,indexed address,indexed uint256,uint256)
-          handler: handleFilled
-        - event: NewProposal(indexed uint256,indexed address,string,uint256,uint256)
-          handler: handleNewProposal
-        - event: YesVote(indexed uint256,indexed address,uint256)
-          handler: handleYesVote
-        - event: NoVote(indexed uint256,indexed address,uint256)
-          handler: handleNoVote
-        - event: Abstain(indexed uint256,indexed address,uint256)
-          handler: handleAbstain
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: ParentChange(address,address)
+          handler: handleParentChange
+        - event: Paused(address)
+          handler: handlePaused
+        - event: Removal(indexed address,uint256)
+          handler: handleRemoval
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Unpaused(address)
+          handler: handleUnpaused
+        - event: Whitelisted(indexed address,indexed bool)
+          handler: handleWhitelisted
+# Outdated
+# dataSources:
+#   - kind: ethereum/contract
+#     name: Frabric
+#     network: rinkeby
+#     source:
+#       address: '0x0f173d9E444Bc4C3443D558dE848A369e8763077' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
+#       abi: Frabric
+#       startBlock: 9190790 # SET TO THE ACTUAL DEPLOYMENT BLOCK
+#     mapping:
+#       kind: ethereum/events
+#       apiVersion: 0.0.5
+#       language: wasm/assemblyscript
+#       file: ./src/mappings/platform.ts
+#       entities:
+#         - MintedAsset
+#         - DeployedAsset
+#       abis:
+#         - name: Platform
+#           file: ./abis/Platform.json
+#       eventHandlers:
+#         - event: AssetMinted(indexed uint256,string)
+#           handler: handleAssetMinted
+#         - event: AssetDeployed(indexed uint256,indexed address,indexed uint256,address,uint256,string)
+#           handler: handleAssetDeployed
+# templates:
+#   - name: Asset
+#     kind: ethereum/contract
+#     network: rinkeby
+#     source:
+#       abi: Asset
+#     mapping:
+#       kind: ethereum/events
+#       apiVersion: 0.0.5
+#       language: wasm/assemblyscript
+#       file: ./src/mappings/asset.ts
+#       entities:
+#         - Proposal
+#         - Vote
+#       abis:
+#         - name: Asset
+#           file: ./abis/Asset.json
+#       eventHandlers:
+#         - event: Transfer(indexed address,indexed address,uint256)
+#           handler: handleTransfer
+#         - event: NewBuyOrder(indexed uint256)
+#           handler: handleNewBuyOrder
+#         - event: NewSellOrder(indexed uint256)
+#           handler: handleNewSellOrder
+#         - event: OrderIncrease(indexed address,indexed uint256,uint256)
+#           handler: handleOrderIncrease
+#         - event: Filled(indexed address,indexed address,indexed uint256,uint256)
+#           handler: handleFilled
+#         - event: NewProposal(indexed uint256,indexed address,string,uint256,uint256)
+#           handler: handleNewProposal
+#         - event: YesVote(indexed uint256,indexed address,uint256)
+#           handler: handleYesVote
+#         - event: NoVote(indexed uint256,indexed address,uint256)
+#           handler: handleNoVote
+#         - event: Abstain(indexed uint256,indexed address,uint256)
+#           handler: handleAbstain
