@@ -183,7 +183,7 @@ type TokenActionProposal @entity {
   baseProposal: BaseProposal!
 }
 
-type ParticipantRemovalProposal @entity { 
+type ParticipantRemovalProposal @entity {
   id: ID!
   participant: Bytes!
   removalFee: Int!
@@ -270,7 +270,7 @@ enum CrowdfundState {
 #  code is supposed to utilize a single auction batch event
 #  to extract potentially (but not always) multiple auctions
 
-type Auction @entity { 
+type Auction @entity {
   id: ID!
   seller: Bytes!
   token: Bytes!
@@ -282,7 +282,7 @@ type Auction @entity {
   isComplete: Boolean! # Can be used to filter active/history items out
 }
 
-type Bid @entity { 
+type Bid @entity {
   id: ID!
   auction: Auction!
   bidder: Bytes!
@@ -307,30 +307,30 @@ type FrabricERC20 @entity {
 }
 
 type FrabricERC20Holder @entity {
-	id: ID!
+  id: ID!
   balances: [FrabricERC20Balance!]! @derivedFrom(field: "holder")
-	transferFromEvents: [FrabricERC20Transfer!]! @derivedFrom(field: "from")
-	transferToEvents: [FrabricERC20Transfer!]! @derivedFrom(field: "to")
+  transferFromEvents: [FrabricERC20Transfer!]! @derivedFrom(field: "from")
+  transferToEvents: [FrabricERC20Transfer!]! @derivedFrom(field: "to")
 }
 
 type FrabricERC20Balance @entity {
-	id: ID!
-	frabricERC20: FrabricERC20!
-	holder: FrabricERC20Holder!
+  id: ID!
+  frabricERC20: FrabricERC20!
+  holder: FrabricERC20Holder!
   amount: BigInt!
-	transfersFrom: [FrabricERC20Transfer!]! @derivedFrom(field: "fromBalance")
-	transfersTo: [FrabricERC20Transfer!]! @derivedFrom(field: "toBalance")
+  transfersFrom: [FrabricERC20Transfer!]! @derivedFrom(field: "fromBalance")
+  transfersTo: [FrabricERC20Transfer!]! @derivedFrom(field: "toBalance")
 }
 
 type FrabricERC20Transfer @entity {
-	id: ID!
-	timestamp: BigInt!
-	frabricERC20: FrabricERC20!
-	from: FrabricERC20Holder
+  id: ID!
+  timestamp: BigInt!
+  frabricERC20: FrabricERC20!
+  from: FrabricERC20Holder
   fromBalance: FrabricERC20Balance
-	to: FrabricERC20Holder
+  to: FrabricERC20Holder
   toBalance: FrabricERC20Balance
-	amount: BigInt!
+  amount: BigInt!
 }
 
 # Distribution
@@ -407,10 +407,10 @@ type ExecutedOrder @entity {
   amount: BigInt!
 }
 
-enum OrderType { 
+enum OrderType {
   Null
-  Buy 
-  Sell 
+  Buy
+  Sell
 }
 
 # Bonds
