@@ -101,6 +101,6 @@ export function voteDirectionAtIndex(index: number): string {
     case 7:
       return "Corporation"
     default:
-      throw "Null"
+      return "Null"
   }
 }
