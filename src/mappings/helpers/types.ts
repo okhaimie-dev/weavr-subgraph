@@ -58,3 +58,49 @@ export function voteDirectionAtIndex(index: number): string {
       return "Null"
   }
 }
+
+/**
+ * Crowdfund state resolver / wrapper.
+ * @param index Raw crowdfund state code
+ * @returns Enum constant for the crowdfund state
+ */
+ export function crowdfundStateAtIndex(index: number): string {
+  switch (index) {
+    case 0:
+      return "Active"
+    case 1:
+      return "Executing"
+    case 2:
+      return "Refunding"
+    case 3:
+      return "Finished"
+    default:
+      throw "Crowdfund state undefined"
+  }
+}
+
+/**
+ * Frabric participant type resolver / wrapper.
+ * @param index Raw participant type code
+ * @returns Enum constant for the participant type
+ */
+ export function frabricParticipantTypeAtIndex(index: number): string {
+  switch (index) {
+    case 1:
+      return "Removed"
+    case 2:
+      return "Genesis"
+    case 3:
+      return "KYC"
+    case 4:
+      return "Governor"
+    case 5:
+      return "Voucher"
+    case 6:
+      return "Individual"
+    case 7:
+      return "Corporation"
+    default:
+      throw "Null"
+  }
+}

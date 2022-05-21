@@ -13,6 +13,9 @@ type Thread @entity {
   erc20: FrabricERC20!
   descriptor: Bytes!
   descriptorChangeProposals: [DesriptorChangeProposal!]! @derivedFrom(field: "thread")
+  upgradeProposals: [UpgradeProposal!]! @derivedFrom(field: "thread")
+  tokenActionProposals: [TokenActionProposal!]! @derivedFrom(field: "thread")
+  participantRemovalProposals: [ParticipantRemovalProposal!]! @derivedFrom(field: "thread")
   frabricChangeProposals: [FrabricChangeProposal!]! @derivedFrom(field: "thread")
   governorChangeProposals: [GovernorChangeProposal!]! @derivedFrom(field: "thread")
   ecosystemLeaveProposals: [EcosystemLeaveWithUpgradesProposal!]! @derivedFrom(field: "thread")
@@ -75,6 +78,9 @@ type Frabric @entity {
   threads: [Thread!]! @derivedFrom(field: "frabric")
   threadProposals: [ThreadProposal!]! @derivedFrom(field: "frabric")
   participantProposals: [ParticipantProposal!]! @derivedFrom(field: "frabric")
+  upgradeProposals: [UpgradeProposal!]! @derivedFrom(field: "frabric")
+  tokenActionProposals: [TokenActionProposal!]! @derivedFrom(field: "frabric")
+  participantRemovalProposals: [ParticipantRemovalProposal!]! @derivedFrom(field: "frabric")
   bondRemovalProposals: [BondRemovalProposal!]! @derivedFrom(field: "frabric")
   threadProposalProposals: [ThreadProposalProposal!]! @derivedFrom(field: "frabric")
   vouchers: [Voucher!]! @derivedFrom(field: "frabric")
@@ -106,7 +112,7 @@ type ThreadProposal @entity {
   governor: Bytes!
   name: String!
   symbol: String!
-  descriptor: String!
+  descriptor: Bytes!
   data: Bytes! # Not sure if this is any useful here
   baseProposal: BaseProposal!
 }
@@ -131,7 +137,7 @@ type BondRemovalProposal @entity {
 type ThreadProposalProposal @entity {
   id: ID!
   frabric: Frabric!
-  thread: Thread!
+  thread: Bytes!
   info: Bytes!
   baseProposal: BaseProposal!
 }
@@ -163,8 +169,17 @@ enum ParticipantType {
 
 # Frabric DAO (a DAO)
 
+## Note: the types below are shared by Frabric and Thread types
+#  which are both kinds of Frabric DAO. Because of that each object of the
+#  types below can reference either 'frabric' or 'thread' as its parent.
+#  This could be done using an abstract type instead of having these two fields
+#  with one of them always null for obvious reasons. However in the current implementation
+#  a choice was made to keep two weak references to the concrete types.
+
 type UpgradeProposal @entity {
   id: ID!
+  frabric: Frabric
+  thread: Thread
   beacon: Bytes!
   instance: Bytes!
   version: BigInt!
@@ -175,6 +190,8 @@ type UpgradeProposal @entity {
 
 type TokenActionProposal @entity {
   id: ID!
+  frabric: Frabric
+  thread: Thread
   token: Bytes!
   target: Bytes!
   mint: Boolean!
@@ -185,8 +202,11 @@ type TokenActionProposal @entity {
 
 type ParticipantRemovalProposal @entity {
   id: ID!
+  frabric: Frabric
+  thread: Thread
   participant: Bytes!
   removalFee: Int!
+  baseProposal: BaseProposal!
 }
 
 enum CommonProposalType {
@@ -200,7 +220,8 @@ enum CommonProposalType {
 
 type BaseProposal @entity {
   id: ID!
-  thread: Thread!
+  thread: Thread
+  frabric: Frabric
   creator: Bytes!
   ## Note: This can be either a CommonProposalType or a ThreadProposalType
   #  The frontend is supposed to define the correct enums / constants locally
@@ -247,7 +268,23 @@ type Crowdfund @entity {
   target: BigInt!
   thread: Thread!
   erc20: FrabricERC20! # TODO: make sure it's a legal casting
+  deposits: [CrowdfundDeposit!]! @derivedFrom(field: "crowdfund")
+  withdrawals: [CrowdfundWithdrawal!]! @derivedFrom(field: "crowdfund")
   distributions: [CrowdfundDistribution!]! @derivedFrom(field: "crowdfund")
+}
+
+type CrowdfundDeposit @entity {
+  id: ID!
+  crowdfund: Crowdfund!
+  depositor: Bytes!
+  amount: BigInt!
+}
+
+type CrowdfundWithdrawal @entity {
+  id: ID!
+  crowdfund: Crowdfund!
+  depositor: Bytes!
+  amount: BigInt!
 }
 
 type CrowdfundDistribution @entity {

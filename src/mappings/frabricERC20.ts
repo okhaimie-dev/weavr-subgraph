@@ -6,7 +6,7 @@ import {
   ParentChange, Paused, Removal, Transfer, Unpaused, 
   Whitelisted, Order as OrderEvent 
 } from '../../generated/templates/FrabricERC20/FrabricERC20';
-import { ExecutedOrder, FrabricERC20, FrabricERC20Transfer, WhitelistRecord, Distribution, Claim, FreezeRecord } from '../../generated/schema';
+import { ExecutedOrder, FrabricERC20Transfer, WhitelistRecord, FreezeRecord } from '../../generated/schema';
 import { orderTypeAtIndex } from './helpers/types'
 import { Initialized } from '../../generated/templates/Thread/Thread';
 import { getFrabricERC20, getFrabricERC20Balance, getFrabricERC20Holder } from './helpers/erc20';
