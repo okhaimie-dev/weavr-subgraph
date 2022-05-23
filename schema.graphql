@@ -74,7 +74,6 @@ type Frabric @entity {
   id: ID!
   participants: [FrabricParticipantRecord!]! @derivedFrom(field: "frabric")
   governorStatuses: [GovernorStatusRecord!]! @derivedFrom(field: "frabric")
-  bondHolders: [BondHoldings!]! @derivedFrom(field: "frabric")
   threads: [Thread!]! @derivedFrom(field: "frabric")
   threadProposals: [ThreadProposal!]! @derivedFrom(field: "frabric")
   participantProposals: [ParticipantProposal!]! @derivedFrom(field: "frabric")
@@ -302,26 +301,28 @@ enum CrowdfundState {
 
 # Auction
 
-## Note: In the current contract implementation
-#  auctions are logged in batches, so the mapping
-#  code is supposed to utilize a single auction batch event
-#  to extract potentially (but not always) multiple auctions
-
 type Auction @entity {
   id: ID!
   seller: Bytes!
   token: Bytes!
   traded: Bytes!
-  amount: BigInt!
+  totalAmount: BigInt!
   start: Int! # TODO: Make sure this accommodates 64 bit
   length: Int!
-  bids: [Bid!]! @derivedFrom(field: "auction")
-  isComplete: Boolean! # Can be used to filter active/history items out
+  batches: [AuctionBatch!]! @derivedFrom(field: "auction")
 }
+
+type AuctionBatch @entity {
+  id: ID!
+  auction: Auction!
+  bids: [Bid!]! @derivedFrom(field: "auctionBatch")
+  isComplete: Boolean!
+}
+
 
 type Bid @entity {
   id: ID!
-  auction: Auction!
+  auctionBatch: AuctionBatch!
   bidder: Bytes!
   amount: BigInt!
 }
@@ -452,11 +453,30 @@ enum OrderType {
 
 # Bonds
 
-## TODO: Revisit or/and test with the actual use case
+type Bond @entity {
+  id: ID!
+  holdings: [BondHoldings!]! @derivedFrom(field: "bond")
+}
 
 type BondHoldings @entity {
   id: ID!
-  frabric: Frabric!
+  bond: Bond!
   governor: Bytes!
   amount: BigInt!
+}
+
+type BondDistribution @entity {
+  id: ID!
+  bond: Bond!
+  distribution: Distribution!
+}
+
+# Timelocks
+
+type Timelock @entity {
+  id: ID!
+  timestamp: Int!
+  token: Bytes!
+  months: Int!
+  amountClaimed: BigInt!
 }

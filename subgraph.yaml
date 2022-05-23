@@ -22,8 +22,90 @@ dataSources:
         - name: ThreadDeployer
           file: ./abis/ThreadDeployer.json
       eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
         - event: Thread(indexed address,indexed uint8,indexed address,address,bytes32)
           handler: handleThread
+        - event: CrowdfundedThread(indexed address,indexed address,indexed address,uint112)
+          handler: handleCrowdfundedThread
+  - kind: ethereum/contract
+    name: Bond
+    network: rinkeby
+    source:
+      address: '0x0000000000000000000000000000000000000000' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
+      abi: Bond
+      startBlock: 0 # SET TO THE ACTUAL DEPLOYMENT BLOCK
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/bond.ts
+      entities:
+        - Bond
+        - BondHoldings
+      abis:
+        - name: Bond
+          file: ./abis/Bond.json
+      eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Bond(address,uint256)
+          handler: handleBond
+        - event: Claim(indexed uint256,indexed address,uint112)
+          handler: handleClaim
+        - event: Distribution(indexed uint256,indexed address,uint112)
+          handler: handleDistribution
+        - event: Slash(address,uint256)
+          handler: handleSlash
+        - event: Unbond(address,uint256)
+          handler: handleUnbond
+  - kind: ethereum/contract
+    name: Timelock
+    network: rinkeby
+    source:
+      address: '0x0000000000000000000000000000000000000000' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
+      abi: Timelock
+      startBlock: 0 # SET TO THE ACTUAL DEPLOYMENT BLOCK
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/timelock.ts
+      entities:
+        - Timelock
+      abis:
+        - name: Timelock
+          file: ./abis/Timelock.json
+      eventHandlers:
+        - event: Claim(indexed address,uint256)
+          handler: handleClaim
+        - event: Lock(indexed address,indexed uint8)
+          handler: handleLock
+  - kind: ethereum/contract
+    name: Auction
+    network: rinkeby
+    source:
+      address: '0x0000000000000000000000000000000000000000' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
+      abi: Auction
+      startBlock: 0 # SET TO THE ACTUAL DEPLOYMENT BLOCK
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/auction.ts
+      entities:
+        - Auction
+        - Bid
+      abis:
+        - name: Auction
+          file: ./abis/Auction.json
+      eventHandlers:
+        - event: AuctionComplete(indexed uint256)
+          handler: handleAuctionComplete
+        - event: Auctions(indexed uint256,indexed address,indexed address,address,uint256,uint8,uint64,uint32)
+          handler: handleAuctions
+        - event: Bid(indexed uint256,address,uint256)
+          handler: handleBid
 templates:
   - name: Frabric
     kind: ethereum/contract
