@@ -1,7 +1,3 @@
-# Initial Frabric (a Frabric DAO)
-
-## TODO: Add the specific entites if required
-
 # Thread (a Frabric DAO)
 
 type Thread @entity {
@@ -72,6 +68,7 @@ enum ThreadProposalType {
 
 type Frabric @entity {
   id: ID!
+  token: FrabricERC20!
   participants: [FrabricParticipantRecord!]! @derivedFrom(field: "frabric")
   governorStatuses: [GovernorStatusRecord!]! @derivedFrom(field: "frabric")
   threads: [Thread!]! @derivedFrom(field: "frabric")

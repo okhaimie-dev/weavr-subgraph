@@ -1,4 +1,4 @@
-import { Bond as BondEvent, Slash, Unbond, Distribution as DistributionEvent, Claim as ClaimEvent } from '../../generated/Bond/Bond';
+import { Bond as BondEvent, Slash, Unbond, Distribution as DistributionEvent, Claim as ClaimEvent } from '../../generated/Bond/BondContract';
 import { Bond, Distribution, Claim, BondDistribution } from '../../generated/schema';
 import { Initialized } from '../../generated/ThreadDeployer/ThreadDeployer';
 import { getBondHoldings } from './helpers/bond';
@@ -14,7 +14,7 @@ export function handleInitialized(event: Initialized): void {
 // TODO: Test for rounding errors
 
 export function handleBond(event: BondEvent): void {
-  let bond = new Bond(event.address.toString())
+  let bond = new Bond(event.address.toHexString())
   bond.save()
 
   let holdings = getBondHoldings(event.address, event.params.governor)
@@ -26,7 +26,7 @@ export function handleBond(event: BondEvent): void {
 
 export function handleSlash(event: Slash): void {
   let holdings = getBondHoldings(event.address, event.params.governor)
-  holdings.bond = event.address.toString()
+  holdings.bond = event.address.toHexString()
   holdings.governor = event.params.governor
   holdings.amount = holdings.amount.minus(event.params.amount)
   holdings.save()
@@ -34,7 +34,7 @@ export function handleSlash(event: Slash): void {
 
 export function handleUnbond(event: Unbond): void {
   let holdings = getBondHoldings(event.address, event.params.governor)
-  holdings.bond = event.address.toString()
+  holdings.bond = event.address.toHexString()
   holdings.governor = event.params.governor
   holdings.amount = holdings.amount.minus(event.params.amount)
   holdings.save()
@@ -49,7 +49,7 @@ export function handleDistribution(event: DistributionEvent): void {
   distribution.save()
 
   let bondDistribution = new BondDistribution(event.params.id.toString())
-  bondDistribution.bond = event.address.toString()
+  bondDistribution.bond = event.address.toHexString()
   bondDistribution.distribution = distribution.id
   bondDistribution.save()
 }

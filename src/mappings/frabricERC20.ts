@@ -1,5 +1,6 @@
 import { Address, dataSource, log, BigInt, store } from '@graphprotocol/graph-ts';
 import { 
+  Initialized,
   Claim as ClaimEvent, DelegateChanged, DelegateVotesChanged, Distribution as DistributionEvent, 
   Freeze, GlobalAcceptance, KYCUpdate, OrderCancellation, 
   OrderCancelling, OrderFill, OrderIncrease, OwnershipTransferred, 
@@ -8,7 +9,6 @@ import {
 } from '../../generated/templates/FrabricERC20/FrabricERC20';
 import { ExecutedOrder, FrabricERC20Transfer, WhitelistRecord, FreezeRecord } from '../../generated/schema';
 import { orderTypeAtIndex } from './helpers/types'
-import { Initialized } from '../../generated/templates/Thread/Thread';
 import { getFrabricERC20, getFrabricERC20Balance, getFrabricERC20Holder } from './helpers/erc20';
 import { ADDRESS_ZERO } from './constants'
 import { getPricePoint } from './helpers/market';
@@ -22,7 +22,7 @@ export function handleInitialized(event: Initialized): void {
 // ### WHITELIST ###
 
 export function handleParentChange(event: ParentChange): void {
-  throw "Not implemented"
+  // Not relevant here
 }
 
 export function handleGlobalAcceptance(event: GlobalAcceptance): void {
@@ -100,7 +100,7 @@ export function handleOrderFill(event: OrderFill): void {
   }
 
   let order = new ExecutedOrder(event.transaction.hash.toString())
-  order.frabricERC20 = event.address.toString()
+  order.frabricERC20 = event.address.toHexString()
   order.blockTimestamp = event.block.timestamp.toI32()
   order.orderer = event.params.orderer
   order.executor = event.params.executor
@@ -188,9 +188,9 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
 
 export function handleFreeze(event: Freeze): void {
   let freezeRecord = new FreezeRecord(event.params.person.toString())
-  freezeRecord.frabricERC20 = event.address.toString()
+  freezeRecord.frabricERC20 = event.address.toHexString()
   freezeRecord.person = event.params.person
-  freezeRecord.frozenUntil = event.params.until.toI64()
+  freezeRecord.frozenUntil = event.params.until.toI32()
   freezeRecord.save()
 }
 

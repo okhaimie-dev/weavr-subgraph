@@ -11,7 +11,7 @@
  * @returns Enum constant for the state
  */
 export function proposalStateAtIndex(index: number): string {
-  switch (index) {
+  switch (u32(index)) {
     case 1:
       return "Active"
     case 2:
@@ -31,7 +31,7 @@ export function proposalStateAtIndex(index: number): string {
  * @returns Enum constant for the direction
  */
 export function voteDirectionAtIndex(index: number): string {
-  switch (index) {
+  switch (u32(index)) {
     case 0:
       return "Yes"
     case 1:
@@ -49,7 +49,7 @@ export function voteDirectionAtIndex(index: number): string {
  * @returns Enum constant for the order type
  */
  export function orderTypeAtIndex(index: number): string {
-  switch (index) {
+  switch (u32(index)) {
     case 1:
       return "Buy"
     case 2:
@@ -65,7 +65,7 @@ export function voteDirectionAtIndex(index: number): string {
  * @returns Enum constant for the crowdfund state
  */
  export function crowdfundStateAtIndex(index: number): string {
-  switch (index) {
+  switch (u32(index)) {
     case 0:
       return "Active"
     case 1:
@@ -85,7 +85,7 @@ export function voteDirectionAtIndex(index: number): string {
  * @returns Enum constant for the participant type
  */
  export function frabricParticipantTypeAtIndex(index: number): string {
-  switch (index) {
+  switch (u32(index)) {
     case 1:
       return "Removed"
     case 2:

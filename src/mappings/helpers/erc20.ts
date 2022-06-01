@@ -11,12 +11,13 @@ import {
 import { FrabricERC20 as FrabricERC20Contract } from '../../../generated/templates/FrabricERC20/FrabricERC20'
 
 export function getFrabricERC20(address: Address): FrabricERC20 {
-	let token = FrabricERC20.load(address.toString())
+	let token = FrabricERC20.load(address.toHexString())
 
-	if (token == null) {
+	if (token === null) {
 		let contract = FrabricERC20Contract.bind(address)
 
-		token = new FrabricERC20(address.toString())
+		token = new FrabricERC20(address.toHexString())
+		token.globalAcceptance = false
 		token.name = contract.name()
 		token.symbol = contract.symbol()
 		token.decimals = contract.decimals()
@@ -29,10 +30,10 @@ export function getFrabricERC20(address: Address): FrabricERC20 {
 }
 
 export function getFrabricERC20Holder(address: Address): FrabricERC20Holder {
-	let holder = FrabricERC20Holder.load(address.toString())
+	let holder = FrabricERC20Holder.load(address.toHexString())
 
-	if (holder == null) {
-		holder = new FrabricERC20Holder(address.toString())
+	if (holder === null) {
+		holder = new FrabricERC20Holder(address.toHexString())
 		holder.save()
 	}
 
@@ -46,7 +47,7 @@ export function getFrabricERC20Balance(
 	let id = token.id.concat('_').concat(holder.id)
 	let balance = FrabricERC20Balance.load(id)
 
-	if (balance == null) {
+	if (balance === null) {
 		balance = new FrabricERC20Balance(id)
 		balance.frabricERC20 = token.id
 		balance.holder = holder.id

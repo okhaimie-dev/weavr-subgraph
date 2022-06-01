@@ -11,8 +11,8 @@ export function handleAuctions(event: Auctions): void {
   auction.token = event.params.token
   auction.traded = event.params.traded
   auction.totalAmount = event.params.total
-  auction.start = event.params.start.toI64()
-  auction.length = event.params.length.toI64()
+  auction.start = event.params.start.toI32()
+  auction.length = event.params.length.toI32()
   auction.save()
 
   while (id.lt(id.plus(numOfBatches))) {

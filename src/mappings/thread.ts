@@ -1,6 +1,20 @@
 import { Address, dataSource, log, BigInt, store } from '@graphprotocol/graph-ts';
-import { Thread as ThreadContract, DescriptorChange, DescriptorChangeProposal, FrabricChange, GovernorChange, Initialized, Proposal, Vote as VoteEvent, ProposalStateChange } from '../../generated/templates/Thread/Thread';
-import { BaseProposal, Thread, PricePoint, DissolutionProposal, EcosystemLeaveWithUpgradesProposal, FrabricChangeProposal, GovernorChangeProposal, ParticipantRemovalProposal, TokenActionProposal, UpgradeProposal, Vote, Frabric, DesriptorChangeProposal } from '../../generated/schema';
+import { 
+  Thread as ThreadContract, DescriptorChange, DescriptorChangeProposal as DescriptorChangeProposalEvent, 
+  FrabricChange, GovernorChange, Initialized, 
+  Proposal, Vote as VoteEvent, ProposalStateChange,
+  DissolutionProposal as DissolutionProposalEvent, 
+  EcosystemLeaveWithUpgradesProposal as EcosystemLeaveWithUpgradesProposalEvent, 
+  FrabricChangeProposal as FrabricChangeProposalEvent, GovernorChangeProposal as GovernorChangeProposalEvent, 
+  ParticipantRemovalProposal as ParticipantRemovalProposalEvent, TokenActionProposal as TokenActionProposalEvent, 
+  UpgradeProposal as UpgradeProposalEvent
+} from '../../generated/templates/Thread/Thread';
+import { 
+  BaseProposal, Thread, DissolutionProposal, 
+  EcosystemLeaveWithUpgradesProposal, FrabricChangeProposal, GovernorChangeProposal, 
+  ParticipantRemovalProposal, TokenActionProposal, UpgradeProposal, 
+  Vote, Frabric, DesriptorChangeProposal 
+} from '../../generated/schema';
 import { proposalStateAtIndex, voteDirectionAtIndex } from './helpers/types'
 
 // ### THREAD LIFECYCLE ###
@@ -21,7 +35,7 @@ export function handleFrabricChange(event: FrabricChange): void {
   // TheGraph supports record merge operations automatically
   // so it's faster to save a new object with the same ID
   // versus load and update an existing one.
-  let thread = new Thread(event.address.toString())
+  let thread = new Thread(event.address.toHexString())
   thread.frabric = frabric.id
   thread.save()
 }
@@ -29,7 +43,7 @@ export function handleFrabricChange(event: FrabricChange): void {
 export function handleDescriptorChange(event: DescriptorChange): void {
   log.info("Calling {}", ["handleDescriptorChange"])
 
-  let thread = new Thread(event.address.toString())
+  let thread = new Thread(event.address.toHexString())
   thread.descriptor = event.params.newDescriptor
   thread.save()
 }
@@ -37,14 +51,14 @@ export function handleDescriptorChange(event: DescriptorChange): void {
 export function handleGovernorChange(event: GovernorChange): void {
   log.info("Calling {}", ["handleGovernorChange"])
 
-  let thread = new Thread(event.address.toString())
+  let thread = new Thread(event.address.toHexString())
   thread.governor = event.params.newGovernor
   thread.save()
 }
 
 // ### THREAD PROPOSALS ###
 
-export function handleDescriptorChangeProposal(event: DescriptorChangeProposal): void {
+export function handleDescriptorChangeProposal(event: DescriptorChangeProposalEvent): void {
   log.info("Calling {}", ["handleDescriptorChangeProposal"])
 
   // Take the previously created base proposal
@@ -54,40 +68,136 @@ export function handleDescriptorChangeProposal(event: DescriptorChangeProposal):
   // with the base proposal
 
   let proposal = new DesriptorChangeProposal(event.params.id.toHexString())
-  proposal.thread = event.address.toString()
+  proposal.thread = event.address.toHexString()
   proposal.descriptor = event.params.descriptor
   proposal.baseProposal = baseProposal.id
   proposal.save()
 }
 
-export function handleGovernorChangeProposal(event: GovernorChangeProposal): void {
-  throw "Not implemented"
+export function handleGovernorChangeProposal(event: GovernorChangeProposalEvent): void {
+  log.info("Calling {}", ["handleGovernorChangeProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new GovernorChangeProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.governor = event.params.governor
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
-export function handleParticipantRemovalProposal(event: ParticipantRemovalProposal): void {
-  throw "Not implemented"
+export function handleParticipantRemovalProposal(event: ParticipantRemovalProposalEvent): void {
+  log.info("Calling {}", ["handleParticipantRemovalProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new ParticipantRemovalProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.participant = event.params.participant
+  proposal.removalFee = event.params.fee
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
-export function handleTokenActionProposal(event: TokenActionProposal): void {
-  throw "Not implemented"
+export function handleTokenActionProposal(event: TokenActionProposalEvent): void {
+  log.info("Calling {}", ["handleTokenActionProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new TokenActionProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.token = event.params.token
+  proposal.target = event.params.target
+  proposal.mint = event.params.mint
+  proposal.price = event.params.price
+  proposal.amount = event.params.amount
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
-export function handleUpgradeProposal(event: UpgradeProposal): void {
-  throw "Not implemented"
+export function handleUpgradeProposal(event: UpgradeProposalEvent): void {
+  log.info("Calling {}", ["handleUpgradeProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new UpgradeProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.beacon = event.params.beacon
+  proposal.instance = event.params.instance
+  proposal.version = event.params.version
+  proposal.code = event.params.code
+  proposal.data = event.params.data
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
-export function handleDissolutionProposal(event: DissolutionProposal): void {
-  throw "Not implemented"
+export function handleDissolutionProposal(event: DissolutionProposalEvent): void {
+  log.info("Calling {}", ["handleDissolutionProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new DissolutionProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.token = event.params.token
+  proposal.price = event.params.price
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
-export function handleFrabricChangeProposal(event: FrabricChangeProposal): void {
-  throw "Not implemented"
+export function handleFrabricChangeProposal(event: FrabricChangeProposalEvent): void {
+  log.info("Calling {}", ["handleFrabricChangeProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new FrabricChangeProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.frabric = event.params.frabric
+  proposal.governor = event.params.governor
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
 export function handleEcosystemLeaveWithUpgradesProposal(
-  event: EcosystemLeaveWithUpgradesProposal
+  event: EcosystemLeaveWithUpgradesProposalEvent
 ): void {
-  throw "Not implemented"
+  log.info("Calling {}", ["handleEcosystemLeaveWithUpgradesProposal"])
+
+  // Take the previously created base proposal
+  let baseProposal = BaseProposal.load(event.params.id.toHexString())!
+
+  // Create the specific proposal record composed
+  // with the base proposal
+
+  let proposal = new EcosystemLeaveWithUpgradesProposal(event.params.id.toHexString())
+  proposal.thread = event.address.toHexString()
+  proposal.frabric = event.params.frabric
+  proposal.governor = event.params.governor
+  proposal.baseProposal = baseProposal.id
+  proposal.save()
 }
 
 export function handleProposal(event: Proposal): void {
@@ -96,7 +206,7 @@ export function handleProposal(event: Proposal): void {
   let contract = ThreadContract.bind(event.address)
 
   let proposal = new BaseProposal(event.params.id.toString())
-  proposal.thread = event.address.toString()
+  proposal.thread = event.address.toHexString()
   proposal.creator = event.params.creator
   // TODO: Smart-map it to a type convenient for the frontend
   proposal.type = event.params.proposalType.toI32()
