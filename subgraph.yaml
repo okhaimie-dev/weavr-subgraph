@@ -6,7 +6,7 @@ schema:
 dataSources:
   - name: Frabric
     kind: ethereum/contract
-    network: mainnet
+    network: rinkeby
     source:
       address: '0x2498e8059929e18e2a2cED4e32ef145fa2F4a744' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
       abi: Frabric
@@ -52,7 +52,7 @@ dataSources:
           handler: handleVouch
   - name: FRBC
     kind: ethereum/contract
-    network: mainnet
+    network: rinkeby
     source:
       address: '0x2498e8059929e18e2a2cED4e32ef145fa2F4a744' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
       abi: FrabricERC20
@@ -114,7 +114,7 @@ dataSources:
           handler: handleWhitelisted
   - kind: ethereum/contract
     name: ThreadDeployer
-    network: mainnet
+    network: rinkeby
     source:
       address: '0xF66CfDf074D2FFD6A4037be3A669Ed04380Aef2B' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
       abi: ThreadDeployer
@@ -138,7 +138,7 @@ dataSources:
           handler: handleThread
   - kind: ethereum/contract
     name: Bond
-    network: mainnet
+    network: rinkeby
     source:
       address: '0x5322471a7E37Ac2B8902cFcba84d266b37D811A0' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
       abi: BondContract
@@ -167,7 +167,7 @@ dataSources:
           handler: handleUnbond
   # - kind: ethereum/contract
   #   name: Timelock
-  #   network: mainnet
+  #   network: rinkeby
   #   source:
   #     address: '0x0000000000000000000000000000000000000000' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
   #     abi: Timelock
@@ -189,7 +189,7 @@ dataSources:
   #         handler: handleLock
   - kind: ethereum/contract
     name: Auction
-    network: mainnet
+    network: rinkeby
     source:
       address: '0x14585B38Cae870DAbA3503EC6dFa50E7c09920Ec' # SET TO THE ACTUAL DEPLOYMENT ADDRESS
       abi: Auction
@@ -215,7 +215,7 @@ dataSources:
 templates:
   - name: Crowdfund
     kind: ethereum/contract
-    network: mainnet
+    network: rinkeby
     source:
       abi: Crowdfund
     mapping:
@@ -251,7 +251,7 @@ templates:
           handler: handleWithdraw
   - name: Thread
     kind: ethereum/contract
-    network: mainnet
+    network: rinkeby
     source:
       abi: Thread
     mapping:
@@ -309,7 +309,7 @@ templates:
           handler: handleVote
   - name: FrabricERC20
     kind: ethereum/contract
-    network: mainnet
+    network: rinkeby
     source:
       abi: FrabricERC20
     mapping:
