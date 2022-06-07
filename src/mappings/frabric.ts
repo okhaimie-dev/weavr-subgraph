@@ -5,7 +5,7 @@ import {
   UpgradeProposal, Vote, Voucher 
 } from '../../generated/schema';
 import { 
-  Initialized, Proposal, ProposalStateChange, 
+  Proposal, ProposalStateChange, 
   BondRemovalProposal as BondRemovalProposalEvent,
   ParticipantProposal as ParticipantProposalEvent, 
   ParticipantRemovalProposal as ParticipantRemovalProposalEvent, 
@@ -18,12 +18,6 @@ import {
 import { frabricParticipantTypeAtIndex, proposalStateAtIndex, voteDirectionAtIndex } from './helpers/types';
 import { getFrabric } from './helpers/frabric';
 
-// ### LIFECYCLE
-
-export function handleInitialized(event: Initialized): void {
-  getFrabric(event.address) // Lazy creation
-}
-
 // ### PROPOSALS ###
 
 // TODO: Extract reusable proposal and voting code
@@ -31,7 +25,7 @@ export function handleInitialized(event: Initialized): void {
 export function handleProposal(event: Proposal): void {
   let contract = FrabricContract.bind(event.address)
 
-  let proposal = new BaseProposal(event.params.id.toString())
+  let proposal = new BaseProposal(event.params.id.toHexString())
   proposal.frabric = event.address.toHexString()
   proposal.creator = event.params.creator
   // TODO: Smart-map it to a type convenient for the frontend
@@ -45,16 +39,16 @@ export function handleProposal(event: Proposal): void {
 }
 
 export function handleProposalStateChange(event: ProposalStateChange): void {
-  let proposal = new BaseProposal(event.params.id.toString())
+  let proposal = new BaseProposal(event.params.id.toHexString())
   proposal.state =  proposalStateAtIndex(event.params.state)
   proposal.save()
 }
 
 export function handleVote(event: VoteEvent): void {
-  let voteId = event.params.id.toString().concat("_").concat(event.params.voter.toHexString())
+  let voteId = event.params.id.toHexString().concat("_").concat(event.params.voter.toHexString())
 
   let vote = new Vote(voteId)
-  vote.proposal = BaseProposal.load(event.params.id.toString())!.id
+  vote.proposal = BaseProposal.load(event.params.id.toHexString())!.id
   vote.voter = event.params.voter
   vote.voteDirection = voteDirectionAtIndex(event.params.direction)
   vote.count = event.params.votes
@@ -66,7 +60,7 @@ export function handleBondRemovalProposal(event: BondRemovalProposalEvent): void
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new BondRemovalProposal(event.params.id.toString())
+  let proposal = new BondRemovalProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.participant = event.params.participant
   proposal.slash = event.params.slash
@@ -80,7 +74,7 @@ export function handleParticipantProposal(event: ParticipantProposalEvent): void
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new ParticipantProposal(event.params.id.toString())
+  let proposal = new ParticipantProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.participant = event.params.participant
   proposal.proposer = event.params.proposer
@@ -94,7 +88,7 @@ export function handleParticipantRemovalProposal(event: ParticipantRemovalPropos
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new ParticipantRemovalProposal(event.params.id.toString())
+  let proposal = new ParticipantRemovalProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.participant = event.params.participant
   proposal.removalFee = event.params.fee
@@ -107,7 +101,7 @@ export function handleThreadProposal(event: ThreadProposalEvent): void {
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new ThreadProposal(event.params.id.toString())
+  let proposal = new ThreadProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.governor = event.params.governor
   proposal.name = event.params.name
@@ -123,7 +117,7 @@ export function handleThreadProposalProposal(event: ThreadProposalProposalEvent)
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new ThreadProposalProposal(event.params.id.toString())
+  let proposal = new ThreadProposalProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.thread = event.params.thread
   proposal.info = event.params.info
@@ -136,7 +130,7 @@ export function handleTokenActionProposal(event: TokenActionProposalEvent): void
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new TokenActionProposal(event.params.id.toString())
+  let proposal = new TokenActionProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.token = event.params.token
   proposal.target = event.params.target
@@ -152,7 +146,7 @@ export function handleUpgradeProposal(event: UpgradeProposalEvent): void {
 
   let baseProposal = BaseProposal.load(event.params.id.toHexString())!
 
-  let proposal = new UpgradeProposal(event.params.id.toString())
+  let proposal = new UpgradeProposal(event.params.id.toHexString())
   proposal.frabric = frabric.id
   proposal.beacon = event.params.beacon
   proposal.instance = event.params.instance
@@ -170,15 +164,17 @@ export function handleKYC(event: KYC): void {
 }
 
 export function handleParticipantChange(event: ParticipantChange): void {
-  let participant = new FrabricParticipantRecord(event.params.participant.toString())
-  participant.frabric = event.address.toHexString()
+  let frabric = getFrabric(event.address)
+
+  let participant = new FrabricParticipantRecord(event.params.participant.toHexString())
+  participant.frabric = frabric.id
   participant.address = event.params.participant
   participant.type = frabricParticipantTypeAtIndex(event.params.participantType)
   participant.save()
 }
 
 export function handleVouch(event: Vouch): void {
-  let voucher = new Voucher(event.params.voucher.toString().concat(event.params.vouchee.toString()))
+  let voucher = new Voucher(event.params.voucher.toHexString().concat(event.params.vouchee.toHexString()))
   voucher.frabric = event.address.toHexString()
   voucher.signer = event.params.voucher
   voucher.participant = event.params.vouchee

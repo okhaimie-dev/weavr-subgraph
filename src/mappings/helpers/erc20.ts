@@ -1,5 +1,5 @@
 import {
-	Address, BigInt,
+	Address, BigInt, DataSourceContext, log,
 } from '@graphprotocol/graph-ts'
 
 import {
@@ -8,12 +8,17 @@ import {
   FrabricERC20Balance,
 } from '../../../generated/schema'
 
+import { FrabricERC20 as FrabricERC20Template } from '../../../generated/templates';
 import { FrabricERC20 as FrabricERC20Contract } from '../../../generated/templates/FrabricERC20/FrabricERC20'
 
 export function getFrabricERC20(address: Address): FrabricERC20 {
 	let token = FrabricERC20.load(address.toHexString())
 
 	if (token === null) {
+		let erc20Context = new DataSourceContext()
+		erc20Context.setString('id', address.toHexString())
+		FrabricERC20Template.createWithContext(address, erc20Context)
+
 		let contract = FrabricERC20Contract.bind(address)
 
 		token = new FrabricERC20(address.toHexString())

@@ -1,6 +1,5 @@
 import { Address, dataSource, log, BigInt, store } from '@graphprotocol/graph-ts';
 import { 
-  Initialized,
   Claim as ClaimEvent, DelegateChanged, DelegateVotesChanged, Distribution as DistributionEvent, 
   Freeze, GlobalAcceptance, KYCUpdate, OrderCancellation, 
   OrderCancelling, OrderFill, OrderIncrease, OwnershipTransferred, 
@@ -13,17 +12,7 @@ import { getFrabricERC20, getFrabricERC20Balance, getFrabricERC20Holder } from '
 import { ADDRESS_ZERO } from './constants'
 import { getPricePoint } from './helpers/market';
 
-// ### LIFECYCLE ###
-
-export function handleInitialized(event: Initialized): void {
-  
-}
-
 // ### WHITELIST ###
-
-export function handleParentChange(event: ParentChange): void {
-  // Not relevant here
-}
 
 export function handleGlobalAcceptance(event: GlobalAcceptance): void {
   let token = getFrabricERC20(event.address)
@@ -35,7 +24,7 @@ export function handleWhitelisted(event: Whitelisted): void {
   let token = getFrabricERC20(event.address)
   
   let whitelistRecord = new WhitelistRecord(
-    token.id.toString().concat("_").concat(event.params.person.toString())
+    token.id.concat("_").concat(event.params.person.toHexString())
   )
   whitelistRecord.frabricERC20 = token.id
   whitelistRecord.person = event.params.person
@@ -48,7 +37,7 @@ export function handleKYCUpdate(event: KYCUpdate): void {
   let token = getFrabricERC20(event.address)
   
   let whitelistRecord = new WhitelistRecord(
-    token.id.toString().concat("_").concat(event.params.person.toString())
+    token.id.concat("_").concat(event.params.person.toHexString())
   )
   whitelistRecord.kycHash = event.params.newInfo
   whitelistRecord.save()
@@ -58,7 +47,7 @@ export function handleRemoval(event: Removal): void {
   let token = getFrabricERC20(event.address)
   
   let whitelistRecord = new WhitelistRecord(
-    token.id.toString().concat("_").concat(event.params.person.toString())
+    token.id.concat("_").concat(event.params.person.toHexString())
   )
   whitelistRecord.removed = true
   whitelistRecord.save()
@@ -99,7 +88,7 @@ export function handleOrderFill(event: OrderFill): void {
     pricePoint.save()
   }
 
-  let order = new ExecutedOrder(event.transaction.hash.toString())
+  let order = new ExecutedOrder(event.transaction.hash.toHexString())
   order.frabricERC20 = event.address.toHexString()
   order.blockTimestamp = event.block.timestamp.toI32()
   order.orderer = event.params.orderer
@@ -122,13 +111,11 @@ export function handleTransfer(event: Transfer): void {
   let fromHolder = getFrabricERC20Holder(event.params.from)
   let toHolder = getFrabricERC20Holder(event.params.to)
 
-	let transfer = new FrabricERC20Transfer(event.transaction.hash.toString())
+	let transfer = new FrabricERC20Transfer(event.transaction.hash.toHexString())
   transfer.timestamp = event.block.timestamp
   transfer.frabricERC20 = token.id
   transfer.from = fromHolder.id
-  // transfer.fromBalance = getFrabricERC20Balance(token, fromHolder).id
   transfer.to = toHolder.id
-  // transfer.toBalance = getFrabricERC20Balance(token, toHolder).id
   transfer.amount = event.params.value
 
   // Both 'from' and 'to' holders can be a contract or a zero address.
@@ -136,7 +123,8 @@ export function handleTransfer(event: Transfer): void {
   // in any specific way.
 
 	if (event.params.from == ADDRESS_ZERO) {
-    // TODO: Add any custom minting handler if needed
+    // Minting
+    token.supply = token.supply.plus(event.params.value)
 	} else {
 		let balance = getFrabricERC20Balance(token, fromHolder)
 		balance.amount = balance.amount.minus(event.params.value)
@@ -147,7 +135,8 @@ export function handleTransfer(event: Transfer): void {
 	}
 
 	if (event.params.to == ADDRESS_ZERO) {
-    // TODO: Add any custom burning handler if needed
+    // Burning
+    token.supply = token.supply.minus(event.params.value)
 	} else {
 		let balance = getFrabricERC20Balance(token, toHolder)
 		balance.amount = balance.amount.plus(event.params.value)
@@ -157,6 +146,7 @@ export function handleTransfer(event: Transfer): void {
 		transfer.toBalance = balance.id
 	}
 
+  token.save()
 	transfer.save()
 }
 
@@ -187,7 +177,7 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
 // ### MISC ###
 
 export function handleFreeze(event: Freeze): void {
-  let freezeRecord = new FreezeRecord(event.params.person.toString())
+  let freezeRecord = new FreezeRecord(event.params.person.toHexString())
   freezeRecord.frabricERC20 = event.address.toHexString()
   freezeRecord.person = event.params.person
   freezeRecord.frozenUntil = event.params.until.toI32()

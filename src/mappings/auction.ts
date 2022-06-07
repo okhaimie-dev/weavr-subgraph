@@ -6,7 +6,7 @@ export function handleAuctions(event: Auctions): void {
   var id = event.params.startID
   let numOfBatches = BigInt.fromI64(event.params.quantity)
 
-  let auction = new Auction(id.toString())
+  let auction = new Auction(id.toHexString())
   auction.seller = event.params.seller
   auction.token = event.params.token
   auction.traded = event.params.traded
@@ -16,7 +16,7 @@ export function handleAuctions(event: Auctions): void {
   auction.save()
 
   while (id.lt(id.plus(numOfBatches))) {
-    let batch = new AuctionBatch(id.toString())
+    let batch = new AuctionBatch(id.toHexString())
     batch.auction = auction.id
     batch.isComplete = false
     batch.save()
@@ -26,15 +26,15 @@ export function handleAuctions(event: Auctions): void {
 }
 
 export function handleBid(event: BidEvent): void {
-  let bid = new Bid(event.params.id.toString().concat("_").concat(event.params.bidder.toString()))
-  bid.auctionBatch = event.params.id.toString()
+  let bid = new Bid(event.params.id.toHexString().concat("_").concat(event.params.bidder.toHexString()))
+  bid.auctionBatch = event.params.id.toHexString()
   bid.bidder = event.params.bidder
   bid.amount = event.params.amount
   bid.save()
 }
 
 export function handleAuctionComplete(event: AuctionComplete): void {
-  let batch = new AuctionBatch(event.params.id.toString())
+  let batch = new AuctionBatch(event.params.id.toHexString())
   batch.isComplete = false
   batch.save()
 }

@@ -1,7 +1,7 @@
 import { Address, dataSource, log, BigInt, store } from '@graphprotocol/graph-ts';
 import { 
   Thread as ThreadContract, DescriptorChange, DescriptorChangeProposal as DescriptorChangeProposalEvent, 
-  FrabricChange, GovernorChange, Initialized, 
+  FrabricChange, GovernorChange, 
   Proposal, Vote as VoteEvent, ProposalStateChange,
   DissolutionProposal as DissolutionProposalEvent, 
   EcosystemLeaveWithUpgradesProposal as EcosystemLeaveWithUpgradesProposalEvent, 
@@ -16,12 +16,7 @@ import {
   Vote, Frabric, DesriptorChangeProposal 
 } from '../../generated/schema';
 import { proposalStateAtIndex, voteDirectionAtIndex } from './helpers/types'
-
-// ### THREAD LIFECYCLE ###
-
-export function handleInitialized(event: Initialized): void {
-  
-}
+import { getFrabric } from './helpers/frabric';
 
 // ### THREAD STRUCTURE ###
 
@@ -30,7 +25,7 @@ export function handleFrabricChange(event: FrabricChange): void {
 
   // The force-unwrapping will (supposedly) throw fatal error
   // if the object isn't found.
-  let frabric = Frabric.load(event.params.newGovernor.toString())!
+  let frabric = getFrabric(event.params.newGovernor)
 
   // TheGraph supports record merge operations automatically
   // so it's faster to save a new object with the same ID
@@ -205,7 +200,7 @@ export function handleProposal(event: Proposal): void {
 
   let contract = ThreadContract.bind(event.address)
 
-  let proposal = new BaseProposal(event.params.id.toString())
+  let proposal = new BaseProposal(event.params.id.toHexString())
   proposal.thread = event.address.toHexString()
   proposal.creator = event.params.creator
   // TODO: Smart-map it to a type convenient for the frontend
@@ -221,7 +216,7 @@ export function handleProposal(event: Proposal): void {
 export function handleProposalStateChange(event: ProposalStateChange): void {
   log.info("Calling {}", ["handleProposalStateChange"])
 
-  let proposal = new BaseProposal(event.params.id.toString())
+  let proposal = new BaseProposal(event.params.id.toHexString())
   proposal.state =  proposalStateAtIndex(event.params.state)
   proposal.save()
 }
@@ -229,10 +224,10 @@ export function handleProposalStateChange(event: ProposalStateChange): void {
 export function handleVote(event: VoteEvent): void {
   log.info("Calling {}", ["handleVote"])
 
-  let voteId = event.params.id.toString().concat("_").concat(event.params.voter.toHexString())
+  let voteId = event.params.id.toHexString().concat("_").concat(event.params.voter.toHexString())
 
   let vote = new Vote(voteId)
-  vote.proposal = BaseProposal.load(event.params.id.toString())!.id
+  vote.proposal = BaseProposal.load(event.params.id.toHexString())!.id
   vote.voter = event.params.voter
   vote.voteDirection = voteDirectionAtIndex(event.params.direction)
   vote.count = event.params.votes

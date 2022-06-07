@@ -5,7 +5,7 @@ import { BigInt } from '@graphprotocol/graph-ts';
 // ### TIMELOCK ###
 
 export function handleLock(event: Lock): void {
-  let lock = new Timelock(event.params.token.toString())
+  let lock = new Timelock(event.params.token.toHexString())
   lock.timestamp = event.block.timestamp.toI32()
   lock.token = event.params.token
   lock.months = event.params.months
@@ -14,7 +14,7 @@ export function handleLock(event: Lock): void {
 }
 
 export function handleClaim(event: Claim): void {
-  let lock = new Timelock(event.params.token.toString())
+  let lock = new Timelock(event.params.token.toHexString())
   lock.amountClaimed = event.params.amount
   lock.save()
 }

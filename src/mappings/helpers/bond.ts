@@ -7,13 +7,13 @@ import {
 } from '../../../generated/schema'
 
 export function getBondHoldings(bond: Address, governor: Address): BondHoldings {
-  let id = bond.toString().concat("_").concat(governor.toString())
+  let id = bond.toHexString().concat("_").concat(governor.toHexString())
 
   let holdings = BondHoldings.load(id)
 
 	if (holdings === null) {
 		holdings = new BondHoldings(id)
-    holdings.bond = bond.toString()
+    holdings.bond = bond.toHexString()
     holdings.governor = governor
     holdings.amount = BigInt.fromI32(0)
     holdings.save()

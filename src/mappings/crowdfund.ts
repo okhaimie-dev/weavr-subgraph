@@ -3,14 +3,8 @@ import {
   Distribution as DistributionEvent, Claim as ClaimEvent, Approval, DelegateChanged, DelegateVotesChanged, Transfer
 } from '../../generated/templates/FrabricERC20/FrabricERC20';
 import { Distribution, Claim, Crowdfund, CrowdfundDeposit, CrowdfundWithdrawal, CrowdfundDistribution } from '../../generated/schema';
-import { Deposit, Refund, StateChange, Withdraw, Initialized } from '../../generated/templates/Crowdfund/Crowdfund';
+import { Deposit, Refund, StateChange, Withdraw } from '../../generated/templates/Crowdfund/Crowdfund';
 import { crowdfundStateAtIndex } from './helpers/types';
-
-// ### LIFECYCLE
-
-export function handleInitialized(event: Initialized): void {
-
-}
 
 // ### FUNDING ###
 
@@ -25,7 +19,7 @@ export function handleDeposit(event: Deposit): void {
   crowdfund.amountDeposited = crowdfund.amountDeposited.plus(event.params.amount)
   crowdfund.save()
 
-  let deposit = new CrowdfundDeposit(event.transaction.hash.toString())
+  let deposit = new CrowdfundDeposit(event.transaction.hash.toHexString())
   deposit.crowdfund = crowdfund.id
   deposit.depositor = event.params.depositor
   deposit.amount = event.params.amount
@@ -41,7 +35,7 @@ export function handleWithdraw(event: Withdraw): void {
   crowdfund.amountDeposited = crowdfund.amountDeposited.minus(event.params.amount)
   crowdfund.save()
 
-  let deposit = new CrowdfundWithdrawal(event.transaction.hash.toString())
+  let deposit = new CrowdfundWithdrawal(event.transaction.hash.toHexString())
   deposit.crowdfund = crowdfund.id
   deposit.depositor = event.params.depositor
   deposit.amount = event.params.amount
@@ -51,20 +45,20 @@ export function handleWithdraw(event: Withdraw): void {
 // ### DISTRIBUTION ###
 
 export function handleDistribution(event: DistributionEvent): void {
-  let distribution = new Distribution(event.params.id.toString())
+  let distribution = new Distribution(event.params.id.toHexString())
   distribution.token = event.params.token
   distribution.amount = event.params.amount
   distribution.save()
 
-  let crowdfundDistribution = new CrowdfundDistribution(event.params.id.toString())
+  let crowdfundDistribution = new CrowdfundDistribution(event.params.id.toHexString())
   crowdfundDistribution.crowdfund = event.address.toHexString()
   crowdfundDistribution.distribution = distribution.id
   crowdfundDistribution.save()
 }
 
 export function handleClaim(event: ClaimEvent): void {
-  let claim = new Claim(event.transaction.hash.toString())
-  claim.distribution = event.params.id.toString()
+  let claim = new Claim(event.transaction.hash.toHexString())
+  claim.distribution = event.params.id.toHexString()
   claim.person = event.params.person
   claim.amount = event.params.amount
   claim.save()
