@@ -104,3 +104,23 @@ export function voteDirectionAtIndex(index: number): string {
       return "Null"
   }
 }
+
+/**
+ * Frabric participant type resolver / wrapper.
+ * @param index Raw participant type code
+ * @returns Enum constant for the participant type
+ */
+ export function commonProposalTypeForCode(code: number): string | null {
+  switch (u32(code)) {
+    case 128:
+      return "Paper"
+    case 129:
+      return "Upgrade"
+    case 130:
+      return "TokenAction"
+    case 131:
+      return "ParticipantRemoval"
+    default:
+      return null
+  }
+}

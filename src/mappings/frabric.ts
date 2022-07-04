@@ -1,6 +1,6 @@
 import { Frabric as FrabricContract, KYC, ParticipantChange, Vouch } from '../../generated/Frabric/Frabric';
 import { 
-  BaseProposal, BondRemovalProposal, Frabric, FrabricParticipantRecord, ParticipantProposal, 
+  BaseProposal, BondRemovalProposal, Frabric, FrabricParticipantRecord, PaperProposal, ParticipantProposal, 
   ParticipantRemovalProposal, ThreadProposal, ThreadProposalProposal, TokenActionProposal, 
   UpgradeProposal, Vote, Voucher 
 } from '../../generated/schema';
@@ -15,7 +15,7 @@ import {
   UpgradeProposal as UpgradeProposalEvent,
   Vote as VoteEvent,
 } from '../../generated/Frabric/Frabric';
-import { frabricParticipantTypeAtIndex, proposalStateAtIndex, voteDirectionAtIndex } from './helpers/types';
+import { commonProposalTypeForCode, frabricParticipantTypeAtIndex, proposalStateAtIndex, voteDirectionAtIndex } from './helpers/types';
 import { getFrabric } from './helpers/frabric';
 
 // ### PROPOSALS ###
@@ -36,6 +36,16 @@ export function handleProposal(event: Proposal): void {
   proposal.startTimestamp = event.block.timestamp.toI32()
   proposal.endTimestamp = proposal.startTimestamp + contract.votingPeriod().toI32()
   proposal.save()
+
+  // Handling a special case where 'Paper' proposal type has to be extracted from
+  // the general base proposal
+
+  if (commonProposalTypeForCode(proposal.type) == "Paper") {
+    let paperProposal = new PaperProposal(event.params.id.toHexString())
+    paperProposal.frabric = event.address.toHexString()
+    paperProposal.baseProposal = proposal.id
+    paperProposal.save()
+  }
 }
 
 export function handleProposalStateChange(event: ProposalStateChange): void {

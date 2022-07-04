@@ -79,6 +79,7 @@ type Frabric @entity {
   participantRemovalProposals: [ParticipantRemovalProposal!]! @derivedFrom(field: "frabric")
   bondRemovalProposals: [BondRemovalProposal!]! @derivedFrom(field: "frabric")
   threadProposalProposals: [ThreadProposalProposal!]! @derivedFrom(field: "frabric")
+  paperProposals: [PaperProposal!]! @derivedFrom(field: "frabric")
   vouchers: [Voucher!]! @derivedFrom(field: "frabric")
 }
 
@@ -202,6 +203,12 @@ type ParticipantRemovalProposal @entity {
   thread: Thread
   participant: Bytes!
   removalFee: Int!
+  baseProposal: BaseProposal!
+}
+
+type PaperProposal @entity {
+  id: ID!
+  frabric: Frabric!
   baseProposal: BaseProposal!
 }
 
