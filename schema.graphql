@@ -1,64 +1,486 @@
-type MintedAsset @entity {
-  id: ID!
-  dataURI: String!
-  deployedAsset: DeployedAsset
-}
+# Thread (a Frabric DAO)
 
-type DeployedAsset @entity {
+type Thread @entity {
   id: ID!
-  mintedAsset: MintedAsset!
   contract: Bytes!
-  symbol: String!
-  numOfShares: Int! # or BigInt?
-  owners: [AssetOwnership!]! @derivedFrom(field: "asset")
-  marketOrders: [MarketOrder!]! @derivedFrom(field: "asset")
-  proposals: [Proposal!] @derivedFrom(field: "asset")
+  variant: Int!
+  frabric: Frabric!
+  governor: Bytes!
+  erc20: FrabricERC20!
+  descriptor: Bytes!
+  descriptorChangeProposals: [DesriptorChangeProposal!]! @derivedFrom(field: "thread")
+  upgradeProposals: [UpgradeProposal!]! @derivedFrom(field: "thread")
+  tokenActionProposals: [TokenActionProposal!]! @derivedFrom(field: "thread")
+  participantRemovalProposals: [ParticipantRemovalProposal!]! @derivedFrom(field: "thread")
+  frabricChangeProposals: [FrabricChangeProposal!]! @derivedFrom(field: "thread")
+  governorChangeProposals: [GovernorChangeProposal!]! @derivedFrom(field: "thread")
+  ecosystemLeaveProposals: [EcosystemLeaveWithUpgradesProposal!]! @derivedFrom(field: "thread")
+  dissolutionProposals: [DissolutionProposal!]! @derivedFrom(field: "thread")
 }
 
-type AssetOwnership @entity {
+type DesriptorChangeProposal @entity {
   id: ID!
-  asset: DeployedAsset!
-  owner: Bytes!
-  shares: Int!
+  thread: Thread!
+  descriptor: Bytes!
+  baseProposal: BaseProposal!
 }
 
-type MarketOrder @entity {
+type FrabricChangeProposal @entity {
   id: ID!
-  orderType: MarketOrderType!
-  asset: DeployedAsset!
+  thread: Thread!
+  frabric: Bytes!
+  governor: Bytes!
+  baseProposal: BaseProposal!
+}
+
+type GovernorChangeProposal @entity {
+  id: ID!
+  thread: Thread!
+  governor: Bytes!
+  baseProposal: BaseProposal!
+}
+
+type EcosystemLeaveWithUpgradesProposal @entity {
+  id: ID!
+  thread: Thread!
+  frabric: Bytes!
+  governor: Bytes!
+  baseProposal: BaseProposal!
+}
+
+type DissolutionProposal @entity {
+  id: ID!
+  thread: Thread!
+  token: Bytes!
   price: BigInt!
-  amount: Int!
+  baseProposal: BaseProposal!
 }
 
-enum MarketOrderType {
-  Buy
-  Sell
+enum ThreadProposalType {
+  DescriptorChange
+  FrabricChange
+  GovernorChange
+  EcosystemLeaveWithUpgrades
+  Dissolution
 }
 
-type Proposal @entity {
+# Frabric (a Frabric DAO)
+
+type Frabric @entity {
   id: ID!
-  asset: DeployedAsset!
+  token: FrabricERC20!
+  participants: [FrabricParticipantRecord!]! @derivedFrom(field: "frabric")
+  governorStatuses: [GovernorStatusRecord!]! @derivedFrom(field: "frabric")
+  threads: [Thread!]! @derivedFrom(field: "frabric")
+  threadProposals: [ThreadProposal!]! @derivedFrom(field: "frabric")
+  participantProposals: [ParticipantProposal!]! @derivedFrom(field: "frabric")
+  upgradeProposals: [UpgradeProposal!]! @derivedFrom(field: "frabric")
+  tokenActionProposals: [TokenActionProposal!]! @derivedFrom(field: "frabric")
+  participantRemovalProposals: [ParticipantRemovalProposal!]! @derivedFrom(field: "frabric")
+  bondRemovalProposals: [BondRemovalProposal!]! @derivedFrom(field: "frabric")
+  threadProposalProposals: [ThreadProposalProposal!]! @derivedFrom(field: "frabric")
+  paperProposals: [PaperProposal!]! @derivedFrom(field: "frabric")
+  vouchers: [Voucher!]! @derivedFrom(field: "frabric")
+}
+
+type FrabricParticipantRecord @entity {
+  id: ID!
+  frabric: Frabric!
+  address: Bytes!
+  type: ParticipantType!
+}
+
+type GovernorStatusRecord @entity {
+  id: ID!
+  frabric: Frabric!
+  address: Bytes!
+  status: GovernorStatus!
+}
+
+enum GovernorStatus {
+  Null
+  Active
+  Removed
+}
+
+type ThreadProposal @entity {
+  id: ID!
+  frabric: Frabric!
+  governor: Bytes!
+  name: String!
+  symbol: String!
+  descriptor: Bytes!
+  data: Bytes! # Not sure if this is any useful here
+  baseProposal: BaseProposal!
+}
+
+type ParticipantProposal @entity {
+  id: ID!
+  frabric: Frabric!
+  proposer: Bytes!
+  participant: Bytes!
+  baseProposal: BaseProposal!
+}
+
+type BondRemovalProposal @entity {
+  id: ID!
+  frabric: Frabric!
+  participant: Bytes!
+  slash: Boolean!
+  amount: BigInt!
+  baseProposal: BaseProposal!
+}
+
+type ThreadProposalProposal @entity {
+  id: ID!
+  frabric: Frabric!
+  thread: Bytes!
+  info: Bytes!
+  baseProposal: BaseProposal!
+}
+
+type Voucher @entity {
+  id: ID!
+  frabric: Frabric!
+  signer: Bytes!
+  participant: Bytes!
+}
+
+enum FrabricProposalType {
+  Participant
+  RemoveBond
+  Thread
+  ThreadProposal
+}
+
+enum ParticipantType {
+  Null
+  Removed
+  Genesis
+  KYC
+  Governor
+  Voucher
+  Individual
+  Corporation
+}
+
+# Frabric DAO (a DAO)
+
+## Note: the types below are shared by Frabric and Thread types
+#  which are both kinds of Frabric DAO. Because of that each object of the
+#  types below can reference either 'frabric' or 'thread' as its parent.
+#  This could be done using an abstract type instead of having these two fields
+#  with one of them always null for obvious reasons. However in the current implementation
+#  a choice was made to keep two weak references to the concrete types.
+
+type UpgradeProposal @entity {
+  id: ID!
+  frabric: Frabric
+  thread: Thread
+  beacon: Bytes!
+  instance: Bytes!
+  version: BigInt!
+  code: Bytes!
+  data: Bytes!
+  baseProposal: BaseProposal!
+}
+
+type TokenActionProposal @entity {
+  id: ID!
+  frabric: Frabric
+  thread: Thread
+  token: Bytes!
+  target: Bytes!
+  mint: Boolean!
+  price: BigInt!
+  amount: BigInt!
+  baseProposal: BaseProposal!
+}
+
+type ParticipantRemovalProposal @entity {
+  id: ID!
+  frabric: Frabric
+  thread: Thread
+  participant: Bytes!
+  removalFee: Int!
+  baseProposal: BaseProposal!
+}
+
+type PaperProposal @entity {
+  id: ID!
+  frabric: Frabric!
+  baseProposal: BaseProposal!
+}
+
+enum CommonProposalType {
+  Paper
+  Upgrade
+  TokenAction
+  ParticipantRemoval
+}
+
+# DAO
+
+type BaseProposal @entity {
+  id: ID!
+  thread: Thread
+  frabric: Frabric
   creator: Bytes!
-  dataURI: String!
-  type: String!
+  ## Note: This can be either a CommonProposalType or a ThreadProposalType
+  #  The frontend is supposed to define the correct enums / constants locally
+  #  Please refer to the smart-contract definitions for the types mentioned above
+  #  to see how they are encoded
+  ## TODO: Handle this in the subgraph mapping
+  type: Int!
+  state: ProposalState!
   votes: [Vote!]! @derivedFrom(field: "proposal")
+  info: Bytes!
+  supermajority: Boolean!
   startTimestamp: Int!
   endTimestamp: Int!
-
-  # TODO: Add fields:
-  #   - status (is completed, is passed etc.)
 }
 
 type Vote @entity {
   id: ID!
-  proposal: Proposal!
+  proposal: BaseProposal!
   voter: Bytes!
-  voteType: VoteType!
-  count: Int! # or BigInt?
+  voteDirection: VoteDirection!
+  count: BigInt!
 }
 
-enum VoteType {
+enum ProposalState {
+  Null
+  Active
+  Queued
+  Executed
+  Cancelled
+}
+
+enum VoteDirection {
   Yes
   No
   Abstain
+}
+
+# Crowdfund
+
+type Crowdfund @entity {
+  id: ID!
+  state: CrowdfundState!
+  amountDeposited: BigInt!
+  target: BigInt!
+  thread: Thread!
+  erc20: FrabricERC20! # TODO: make sure it's a legal casting
+  deposits: [CrowdfundDeposit!]! @derivedFrom(field: "crowdfund")
+  withdrawals: [CrowdfundWithdrawal!]! @derivedFrom(field: "crowdfund")
+  distributions: [CrowdfundDistribution!]! @derivedFrom(field: "crowdfund")
+}
+
+type CrowdfundDeposit @entity {
+  id: ID!
+  crowdfund: Crowdfund!
+  depositor: Bytes!
+  amount: BigInt!
+}
+
+type CrowdfundWithdrawal @entity {
+  id: ID!
+  crowdfund: Crowdfund!
+  depositor: Bytes!
+  amount: BigInt!
+}
+
+type CrowdfundDistribution @entity {
+  id: ID!
+  crowdfund: Crowdfund!
+  distribution: Distribution!
+}
+
+enum CrowdfundState {
+  Active
+  Executing
+  Refunding
+  Finished
+}
+
+# Auction
+
+type Auction @entity {
+  id: ID!
+  seller: Bytes!
+  token: Bytes!
+  traded: Bytes!
+  totalAmount: BigInt!
+  start: Int! # TODO: Make sure this accommodates 64 bit
+  length: Int!
+  batches: [AuctionBatch!]! @derivedFrom(field: "auction")
+}
+
+type AuctionBatch @entity {
+  id: ID!
+  auction: Auction!
+  bids: [Bid!]! @derivedFrom(field: "auctionBatch")
+  isComplete: Boolean!
+}
+
+
+type Bid @entity {
+  id: ID!
+  auctionBatch: AuctionBatch!
+  bidder: Bytes!
+  amount: BigInt!
+}
+
+# ERC-20
+
+type FrabricERC20 @entity {
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+  supply: BigInt!
+  tradeToken: Bytes!
+  globalAcceptance: Boolean!
+  whitelist: [WhitelistRecord!]! @derivedFrom(field: "frabricERC20")
+  freezelist: [FreezeRecord!]! @derivedFrom(field: "frabricERC20")
+  orderBook: [PricePoint!]! @derivedFrom(field: "frabricERC20")
+  executedOrders: [ExecutedOrder!]! @derivedFrom(field: "frabricERC20")
+  balances: [FrabricERC20Balance!]! @derivedFrom(field: "frabricERC20")
+}
+
+type FrabricERC20Holder @entity {
+  id: ID!
+  balances: [FrabricERC20Balance!]! @derivedFrom(field: "holder")
+  transferFromEvents: [FrabricERC20Transfer!]! @derivedFrom(field: "from")
+  transferToEvents: [FrabricERC20Transfer!]! @derivedFrom(field: "to")
+}
+
+type FrabricERC20Balance @entity {
+  id: ID!
+  frabricERC20: FrabricERC20!
+  holder: FrabricERC20Holder!
+  amount: BigInt!
+  transfersFrom: [FrabricERC20Transfer!]! @derivedFrom(field: "fromBalance")
+  transfersTo: [FrabricERC20Transfer!]! @derivedFrom(field: "toBalance")
+}
+
+type FrabricERC20Transfer @entity {
+  id: ID!
+  timestamp: BigInt!
+  frabricERC20: FrabricERC20!
+  from: FrabricERC20Holder
+  fromBalance: FrabricERC20Balance
+  to: FrabricERC20Holder
+  toBalance: FrabricERC20Balance
+  amount: BigInt!
+}
+
+# Distribution
+
+type Distribution @entity {
+  id: ID!
+  token: Bytes!
+  amount: BigInt!
+  claims: [Claim!]! @derivedFrom(field: "distribution")
+}
+
+type Claim @entity {
+  id: ID!
+  distribution: Distribution!
+  person: Bytes!
+  amount: BigInt!
+}
+
+# Whitelist
+
+# TODO: Add support for global whitelist
+
+type WhitelistRecord @entity {
+  id: ID!
+  frabricERC20: FrabricERC20!
+  person: Bytes!
+  kycHash: Bytes
+  removed: Boolean
+}
+
+## Note: This is how the contract manages the whitelist state
+#  The UI doesn't really have to follow this pattern
+#  Leaving it here for reference
+
+# enum WhitelistStatus {
+#   Null
+#   Removed
+#   Whitelisted
+#   KYC
+# }
+
+# Freezelist
+
+type FreezeRecord @entity {
+  id: ID!
+  frabricERC20: FrabricERC20!
+  person: Bytes!
+  frozenUntil: Int # TODO: Make sure this accommodates 64 bit
+}
+
+# Exchange
+
+## Note: This type can help the frontend get an idea about
+#  the available liquidity below/above a certain price
+#  which is informative for buyers and sellers making decisions
+
+type PricePoint @entity {
+  id: ID!
+  frabricERC20: FrabricERC20!
+  price: BigInt!
+  type: OrderType!
+  totalAmount: BigInt!
+}
+
+## Note: This type describes an atomic order history item.
+
+type ExecutedOrder @entity {
+  id: ID!
+  frabricERC20: FrabricERC20!
+  blockTimestamp: Int!
+  orderer: Bytes!
+  executor: Bytes!
+  price: BigInt!
+  amount: BigInt!
+}
+
+enum OrderType {
+  Null
+  Buy
+  Sell
+}
+
+# Bonds
+
+type Bond @entity {
+  id: ID!
+  holdings: [BondHoldings!]! @derivedFrom(field: "bond")
+}
+
+type BondHoldings @entity {
+  id: ID!
+  bond: Bond!
+  governor: Bytes!
+  amount: BigInt!
+}
+
+type BondDistribution @entity {
+  id: ID!
+  bond: Bond!
+  distribution: Distribution!
+}
+
+# Timelocks
+
+type Timelock @entity {
+  id: ID!
+  timestamp: Int!
+  token: Bytes!
+  months: Int!
+  amountClaimed: BigInt!
 }
