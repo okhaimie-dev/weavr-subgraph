@@ -112,13 +112,13 @@ export function voteDirectionAtIndex(index: number): string {
  */
  export function commonProposalTypeForCode(code: number): string | null {
   switch (u32(code)) {
-    case 128:
+    case 256:
       return "Paper"
-    case 129:
+    case 257:
       return "Upgrade"
-    case 130:
+    case 258:
       return "TokenAction"
-    case 131:
+    case 259:
       return "ParticipantRemoval"
     default:
       return null
