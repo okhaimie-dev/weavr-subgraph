@@ -33,11 +33,11 @@ export function proposalStateAtIndex(index: number): string {
 export function voteDirectionAtIndex(index: number): string {
   switch (u32(index)) {
     case 0:
-      return "Yes"
-    case 1:
-      return "No"
-    case 2:
       return "Abstain"
+    case 1:
+      return "Yes"
+    case 2:
+      return "No"
     default:
       throw "Vote direction undefined"
   }
