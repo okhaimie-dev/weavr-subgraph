@@ -89,6 +89,7 @@ export function handleParticipantProposal(event: ParticipantProposalEvent): void
   proposal.participant = event.params.participant
   proposal.proposer = event.params.proposer
   proposal.participant = event.params.participant
+  proposal.participantType = frabricParticipantTypeAtIndex(event.params.participantType)
   proposal.baseProposal = baseProposal.id
   proposal.save()
 }

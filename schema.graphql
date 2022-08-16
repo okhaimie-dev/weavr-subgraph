@@ -119,6 +119,7 @@ type ParticipantProposal @entity {
   frabric: Frabric!
   proposer: Bytes!
   participant: Bytes!
+  participantType: String!
   baseProposal: BaseProposal!
 }
 
